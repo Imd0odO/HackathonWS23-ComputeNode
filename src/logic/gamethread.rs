@@ -2,7 +2,7 @@ use std::num::NonZeroU64;
 use std::thread;
 use std::time::Instant;
 use crossbeam::thread::ScopedJoinHandle;
-use rocket::tokio::task::JoinHandle;
+use crate::logic::deck::deal_remaining;
 use crate::models::card::Card;
 
 // specify the thread count that should be used (recommended: cores - 2)
@@ -41,6 +41,8 @@ pub fn simulate(hands: Vec<Vec<Card>>, remaining_cards: Vec<Card>) -> WinEstimat
                     // clone start conditions
                     let mut round_cards: Vec<Card> = remaining_cards.clone();
                     let mut round_hands: Vec<Vec<Card>> = hands.clone();
+
+                    deal_remaining(&mut round_hands, &mut round_cards);
 
                     // increment games played for ever round simulated
                     response.games_played += 1;
