@@ -27,13 +27,14 @@ pub enum BestHand {
 
 // evaluate all cards
 pub fn evaluate(hand: &Vec<Card>) -> BestHand {
-    return evaluateFlushes(hand)
+    evaluate_flushes(hand);
+    evaluate_straight(hand);
+    return BestHand::HighCard(hand[0].rank)
 }
 
 
 // calculate every suit based winning hand
-fn evaluateFlushes(cards: &Vec<Card>) -> BestHand {
-
+fn evaluate_flushes(cards: &Vec<Card>) -> BestHand {
     // create a vector for each suit
     let mut suits: Vec<Vec<&Card>> = vec![vec![], vec![], vec![], vec![]];
 
@@ -64,5 +65,23 @@ fn evaluateFlushes(cards: &Vec<Card>) -> BestHand {
         }
     }
     // if its not suit based best hand -> high card
+    return BestHand::HighCard(cards[0].rank);
+}
+
+// calculate every straight based winning hand
+fn evaluate_straight(cards: &Vec<Card>) -> BestHand {
+    // filter double cards, since they don't matter in straights
+    let mut only_singles_hand = cards.clone();
+    only_singles_hand.dedup_by(|a, b| a.rank < b.rank);
+
+    // compare every possible straight
+    for i in 0..(only_singles_hand.len() - 5) {
+        if cards[i].rank as u8 + 1  == cards[1+i].rank as u8 && cards[i+1].rank as u8 + 1 == cards[i+2].rank as u8 &&
+            cards[i+2].rank as u8 + 1 == cards[i+3].rank as u8 && cards[i+3].rank as u8 + 1 == cards[i+4].rank as u8{
+            return BestHand::Straight(cards[i].rank);
+        }
+    }
+
+    // if its not straight based best hand -> high card
     return BestHand::HighCard(cards[0].rank);
 }
