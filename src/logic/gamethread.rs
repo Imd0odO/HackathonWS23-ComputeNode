@@ -3,6 +3,7 @@ use std::thread;
 use std::time::Instant;
 use crossbeam::thread::ScopedJoinHandle;
 use crate::logic::deck::deal_remaining;
+use crate::logic::winning_combinations::{BestHand, evaluate};
 use crate::models::card::Card;
 
 // specify the thread count that should be used (recommended: cores - 2)
@@ -42,7 +43,14 @@ pub fn simulate(hands: Vec<Vec<Card>>, remaining_cards: Vec<Card>) -> WinEstimat
                     let mut round_cards: Vec<Card> = remaining_cards.clone();
                     let mut round_hands: Vec<Vec<Card>> = hands.clone();
 
+                    // deal everybody cards until everyone has seven
                     deal_remaining(&mut round_hands, &mut round_cards);
+
+                    // evaluate hands
+                    let mut best_hands: Vec<BestHand> = Vec::with_capacity(round_hands.len());
+                    for hand in round_hands {
+                        best_hands.push(evaluate(&hand));
+                    }
 
                     // increment games played for ever round simulated
                     response.games_played += 1;
