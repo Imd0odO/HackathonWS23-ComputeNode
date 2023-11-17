@@ -10,5 +10,8 @@ pub fn decide(table: Json<crate::models::table::Table>) -> crate::models::bet::B
     // start Monte Carlo
     let estimation: WinEstimation = monte_carlo(table);
 
+    // print estimated chance of winning
+    println!("-> Estimated chance of winning this hand: {:2.2}%", estimation.chance * 100.0);
+
     return crate::models::bet::Bet{bet: 0};
  }

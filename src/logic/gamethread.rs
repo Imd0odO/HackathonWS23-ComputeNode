@@ -52,6 +52,15 @@ pub fn simulate(hands: Vec<Vec<Card>>, remaining_cards: Vec<Card>) -> WinEstimat
                         best_hands.push(evaluate(&hand));
                     }
 
+                    // compare own hand to other hands
+                    let player_best_hand: BestHand = best_hands[0];
+                    best_hands.sort();
+
+                    // increment games won if own hand won in the simulated round
+                    if player_best_hand == best_hands[0] {
+                        response.games_won += 1;
+                    }
+
                     // increment games played for ever round simulated
                     response.games_played += 1;
                 }
@@ -65,7 +74,7 @@ pub fn simulate(hands: Vec<Vec<Card>>, remaining_cards: Vec<Card>) -> WinEstimat
         }
 
         // print stat end line and clear terminal
-        println!("===========================================================");
+        println!("===================================================================");
         print!("\x1B[2J\x1B[1;1H");
 
         // wait for all threads to finish
@@ -78,15 +87,15 @@ pub fn simulate(hands: Vec<Vec<Card>>, remaining_cards: Vec<Card>) -> WinEstimat
             total_games_won += response.games_won;
 
             // print thread statistics
-            println!("Thread: {:2} won {:10} out of {:10} games in {:4}ms" , (response.id.get() - 12) % THREAD_COUNT as u64 , response.games_won, response.games_played, response.time_spent)
+            println!("Thread: {:10} won {:10} out of {:10} games in {:4}ms" , response.id.get(), response.games_won, response.games_played, response.time_spent)
         }
         // print global statistics
-        println!("-----------------------------------------------------------");
-        print!("Total:     won {:10} out of {:10} games in ", total_games_won, total_games_played)
+        println!("-------------------------------------------------------------------");
+        print!("Total:             won {:10} out of {:10} games in ", total_games_won, total_games_played)
     }).unwrap();
 
     // return win estimation
-    return WinEstimation { chance: 0f64 }
+    return WinEstimation { chance: total_games_won as f64 / total_games_played as f64 }
 }
 
 pub struct ThreadResponse {
@@ -97,5 +106,5 @@ pub struct ThreadResponse {
 }
 
 pub struct WinEstimation {
-    chance: f64
+    pub(crate) chance: f64
 }
