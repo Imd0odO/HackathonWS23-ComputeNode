@@ -5,9 +5,6 @@ use crate::models::bet::Bet;
 
 
 pub fn decide(table: Json<crate::models::table::Table>) -> crate::models::bet::Bet {
-    // clear terminal for stats
-    print!("\x1B[2J\x1B[1;1H");
-
     // get active player
     let active_player: usize = table.active_player as usize;
 
