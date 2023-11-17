@@ -1,7 +1,10 @@
+use crate::logic::winning_combinations::BestHand::{Flush, FourOfAKind, FullHouse, HighCard, Pair, ThreeOfAKind, TwoPair};
 use crate::models::card::Card;
+use crate::models::rank;
 use crate::models::rank::Rank;
 use crate::models::suit::Suit;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, PartialOrd)]
 pub enum BestHand {
     // Royal Flush
     RoyalFlush,
@@ -27,9 +30,12 @@ pub enum BestHand {
 
 // evaluate all cards
 pub fn evaluate(hand: &Vec<Card>) -> BestHand {
-    evaluate_flushes(hand);
-    evaluate_straight(hand);
-    return BestHand::HighCard(hand[0].rank)
+    let mut best: Vec<BestHand> = vec![];
+    best.push(evaluate_flushes(hand));
+    best.push(evaluate_straight(hand));
+    best.push(evaluate_pairs(hand));
+    best.sort();
+    return best[0];
 }
 
 
@@ -61,11 +67,11 @@ fn evaluate_flushes(cards: &Vec<Card>) -> BestHand {
                 }
                 return BestHand::StraightFlush(suit[0].rank);
             }
-            return BestHand::Flush(suit[0].rank);
+            return Flush(suit[0].rank);
         }
     }
     // if its not suit based best hand -> high card
-    return BestHand::HighCard(cards[0].rank);
+    return HighCard(cards[0].rank);
 }
 
 // calculate every straight based winning hand
@@ -84,4 +90,55 @@ fn evaluate_straight(cards: &Vec<Card>) -> BestHand {
 
     // if its not straight based best hand -> high card
     return BestHand::HighCard(cards[0].rank);
+}
+
+// calculate every pair based winning hand
+fn evaluate_pairs(cards: &Vec<Card>) -> BestHand {
+    // create a vector for each rank
+    let mut ranks: Vec<Vec<Card>> = vec![vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![], vec![]];
+
+    //sort cards for suit
+    for card in cards {
+        match card.rank {
+            Rank::A => ranks[0].push(*card),
+            Rank::K => ranks[1].push(*card),
+            Rank::Q => ranks[2].push(*card),
+            Rank::J => ranks[3].push(*card),
+            Rank::_10 => ranks[4].push(*card),
+            Rank::_9 => ranks[5].push(*card),
+            Rank::_8 => ranks[6].push(*card),
+            Rank::_7 => ranks[7].push(*card),
+            Rank::_6 => ranks[8].push(*card),
+            Rank::_5 => ranks[9].push(*card),
+            Rank::_4 => ranks[10].push(*card),
+            Rank::_3 => ranks[11].push(*card),
+            Rank::_2 => ranks[12].push(*card),
+        }
+    }
+
+    let mut best: BestHand = BestHand::HighCard(cards[0].rank);
+
+    for rank in ranks {
+        if rank.len() == 4 {
+            best = match best {
+                _ => FourOfAKind(rank[0].rank)
+            }
+        }
+        if rank.len() == 3 {
+            best = match best {
+                Pair(r) => FullHouse(rank[0].rank, r),
+                HighCard(r) => ThreeOfAKind(rank[0].rank),
+                _ => best
+            }
+        }
+        if rank.len() == 2 {
+            best = match best {
+                ThreeOfAKind(r) => FullHouse(r, rank[0].rank),
+                Pair(r) => TwoPair(r, rank[0].rank),
+                HighCard(r) => Pair(rank[0].rank),
+                _ => best
+            }
+        }
+    }
+    return best;
 }
