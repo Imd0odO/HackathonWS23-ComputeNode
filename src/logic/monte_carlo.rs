@@ -1,3 +1,4 @@
+use std::ops::DerefMut;
 use rocket::serde::json::Json;
 use crate::models::table::Table;
 use std::time::Instant;
@@ -15,7 +16,8 @@ pub fn monte_carlo(mut table: Json<Table>) -> WinEstimation {
     (0..table.players.len()).for_each(|i| {
         hands.push(table.community_cards.clone());
     });
-    hands[0].append(&mut table.players[table.active_player as usize].cards.as_mut().unwrap());
+    let active_player: usize = table.active_player as usize;
+    hands[0].append(&mut table.players[active_player].cards.as_mut().unwrap());
 
     // calculate remaining cards based on the known cards (own hand)
     let remaining_cards: Vec<Card> = get_remaining_cards(hands[0].clone());
