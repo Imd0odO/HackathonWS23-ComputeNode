@@ -2,7 +2,9 @@ use crate::models::card::Card;
 use crate::models::rank::Rank;
 use crate::models::suit::Suit;
 
+// calculate remaining cards
 pub fn get_remaining_cards(known_cards: Vec<Card>) -> Vec<Card> {
+    // all cards at the start of a game
     let mut all: Vec<Card> = vec![
         Card { rank: Rank::A, suit: Suit::HEARTS },
         Card { rank: Rank::K, suit: Suit::HEARTS },
@@ -61,14 +63,16 @@ pub fn get_remaining_cards(known_cards: Vec<Card>) -> Vec<Card> {
         Card { rank: Rank::_2, suit: Suit::SPADES },
     ];
 
+    // remove cards that are known / visible to the player
     for card in known_cards {
         all.remove(all.iter().position(|c| *c == card).unwrap());
     }
 
+    // return cards still in the deck
     return all;
 }
 
-pub fn deal_remaining(hands: &mut Vec<Vec<&Card>>, remaining: &mut Vec<Card>) {
-
+// deal cards to players until everybody has 7 cards (5 community cards + 2 hand cards)
+pub fn deal_remaining() {
 
 }
