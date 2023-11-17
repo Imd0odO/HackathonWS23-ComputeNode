@@ -67,3 +67,8 @@ pub fn get_remaining_cards(known_cards: Vec<Card>) -> Vec<Card> {
 
     return all;
 }
+
+pub fn deal_remaining(hands: &mut Vec<Vec<&Card>>, remaining: &mut Vec<Card>) {
+
+
+}

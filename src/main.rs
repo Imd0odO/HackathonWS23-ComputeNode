@@ -1,3 +1,4 @@
+#![feature(thread_id_value)]
 #[macro_use] extern crate rocket;
 use rocket::serde::json::Json;
 use crate::models::table::Table;
