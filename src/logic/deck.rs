@@ -92,4 +92,8 @@ pub fn deal_remaining(hands: &mut  Vec<Vec<Card>>, cards: &mut Vec<Card>) {
             hands[player_index].append(&mut vec![cards[card_index]]);
         }
     }
+
+    for mut hand in hands {
+        hand.sort_by_key(|h| h.rank)
+    }
 }
