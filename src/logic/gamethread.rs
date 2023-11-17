@@ -57,7 +57,7 @@ pub fn simulate(hands: Vec<Vec<Card>>, remaining_cards: Vec<Card>) -> WinEstimat
         }
 
         // print stat end line and clear terminal
-        println!("===================================================================");
+        println!("===========================================================");
         print!("\x1B[2J\x1B[1;1H");
 
         // wait for all threads to finish
@@ -70,11 +70,11 @@ pub fn simulate(hands: Vec<Vec<Card>>, remaining_cards: Vec<Card>) -> WinEstimat
             total_games_won += response.games_won;
 
             // print thread statistics
-            println!("Thread: {:10} won {:10} out of {:10} games in {:4}ms" , response.id, response.games_won, response.games_played, response.time_spent)
+            println!("Thread: {:2} won {:10} out of {:10} games in {:4}ms" , (response.id.get() - 12) % THREAD_COUNT as u64 , response.games_won, response.games_played, response.time_spent)
         }
         // print global statistics
-        println!("-------------------------------------------------------------------");
-        print!("Total:             won {:10} out of {:10} games in ", total_games_won, total_games_played)
+        println!("-----------------------------------------------------------");
+        print!("Total:     won {:10} out of {:10} games in ", total_games_won, total_games_played)
     }).unwrap();
 
     // return win estimation
