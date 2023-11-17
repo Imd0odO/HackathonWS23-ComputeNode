@@ -1,12 +1,20 @@
+use rocket::http::Status;
 use rocket::serde::json::Json;
 use crate::logic::gamethread::WinEstimation;
 use crate::logic::monte_carlo::monte_carlo;
 use crate::models::bet::Bet;
+use crate::models::player::PlayerStatusEnum;
 
 
-pub fn decide(table: Json<crate::models::table::Table>) -> crate::models::bet::Bet {
+pub fn decide(mut table: Json<crate::models::table::Table>) -> crate::models::bet::Bet {
+    // get player count
+    let player_count : usize = table.players.len();
+
+    // remove inactive players
+    table.players.retain(|player| player.status != PlayerStatusEnum::OUT);
+
     // get active player
-    let active_player: usize = table.active_player as usize;
+    let active_player: usize = (table.active_player - ((player_count - table.players.len())) as i32) as usize;
 
     // get own stack
     let stack: i32 = table.players[active_player].stack;
@@ -23,7 +31,7 @@ pub fn decide(table: Json<crate::models::table::Table>) -> crate::models::bet::B
     let min_bet: i32 = table.minimum_bet;
 
     // start Monte Carlo
-    let estimation: WinEstimation = monte_carlo(table);
+    let estimation: WinEstimation = monte_carlo(table, active_player);
 
     // print estimated chance of winning
     println!("-> Estimated chance of winning this hand: {:2.2}%", estimation.chance * 100.0);

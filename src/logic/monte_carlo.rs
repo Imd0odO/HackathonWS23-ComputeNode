@@ -7,7 +7,7 @@ use crate::logic::gamethread::{simulate, WinEstimation};
 use crate::models::card::Card;
 
 
-pub fn monte_carlo(mut table: Json<Table>) -> WinEstimation {
+pub fn monte_carlo(mut table: Json<Table>, active_player: usize) -> WinEstimation {
     // create start Timestamp for stats
     let simulation_start: Instant = Instant::now();
 
@@ -16,7 +16,6 @@ pub fn monte_carlo(mut table: Json<Table>) -> WinEstimation {
     (0..table.players.len()).for_each(|i| {
         hands.push(table.community_cards.clone());
     });
-    let active_player: usize = table.active_player as usize;
     hands[0].append(&mut table.players[active_player].cards.as_mut().unwrap());
 
     // calculate remaining cards based on the known cards (own hand)
