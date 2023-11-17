@@ -2,7 +2,7 @@ use crate::models::card::Card;
 use crate::models::rank::Rank;
 use crate::models::suit::Suit;
 
-pub fn get_remaining_cards(known: &Vec<&Card>) -> Vec<Card> {
+pub fn get_remaining_cards(known_cards: Vec<Card>) -> Vec<Card> {
     let mut all: Vec<Card> = vec![
         Card { rank: Rank::A, suit: Suit::HEARTS },
         Card { rank: Rank::K, suit: Suit::HEARTS },
@@ -61,9 +61,9 @@ pub fn get_remaining_cards(known: &Vec<&Card>) -> Vec<Card> {
         Card { rank: Rank::_2, suit: Suit::SPADES },
     ];
 
-    known.iter().for_each(|k: &&Card| {
-        all.retain(|a| *a == **k);
-    });
+    for card in known_cards {
+        all.remove(all.iter().position(|c| *c == card).unwrap());
+    }
 
     return all;
 }
