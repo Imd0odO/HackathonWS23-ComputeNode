@@ -25,11 +25,11 @@ pub fn decide(mut table: Json<crate::models::table::Table>) -> crate::models::be
         if max_bet < table.players[player_index].bet {
             max_bet = table.players[player_index].bet;
         }
-        if table.players[player_index].bet >= stack && table.players.len() >= 5 {
+        if table.players[player_index].bet >= stack && table.players.len() > 5 {
             all_in = true
         }
     };
-    if all_in {max_bet = stack * 2 / 3}
+    if all_in {max_bet = 0}
 
     // get min bet
     let min_bet: i32 = table.minimum_bet;

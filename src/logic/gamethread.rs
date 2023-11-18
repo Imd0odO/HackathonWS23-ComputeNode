@@ -4,6 +4,7 @@ use std::time::Instant;
 use crossbeam::thread::ScopedJoinHandle;
 use crate::logic::deck::deal_remaining;
 use crate::logic::winning_combinations::{BestHand, evaluate};
+use crate::logic::winning_combinations::BestHand::{Flush, FourOfAKind, FullHouse, HighCard, Pair, RoyalFlush, Straight, StraightFlush, ThreeOfAKind, TwoPair};
 use crate::models::card::Card;
 
 // specify the thread count that should be used (recommended: cores - 2)
@@ -52,12 +53,106 @@ pub fn simulate(hands: Vec<Vec<Card>>, remaining_cards: Vec<Card>) -> WinEstimat
                         best_hands.push(evaluate(&hand));
                     }
 
-                    // compare own hand to other hands
+                    // get won hand
                     let player_best_hand: BestHand = best_hands[0];
+
+                    // sort all hands
                     best_hands.sort();
 
+                    // evaluate best two hands
+                    let best_hand: BestHand;
+                    match (best_hands[0], best_hands[1]) {
+                        (RoyalFlush, RoyalFlush) => {
+                            best_hand = RoyalFlush
+                        }
+                        (StraightFlush(r1), StraightFlush(r2)) => {
+                            if r1 < r2 {
+                                best_hand = StraightFlush(r1)
+                            }
+                            else {
+                                best_hand = StraightFlush(r2)
+                            }
+                        }
+                        (FourOfAKind(r1), FourOfAKind(r2)) => {
+                            if r1 < r2 {
+                                best_hand = FourOfAKind(r1)
+                            }
+                            else {
+                                best_hand = FourOfAKind(r2)
+                            }
+
+                        }
+                        (FullHouse(r1, r2), FullHouse(r3, r4)) => {
+                            let mut v1 = vec![r1, r2];
+                            let mut v2 = vec![r3, r4];
+                            v1.sort();
+                            v2.sort();
+                            if v1[0] < v2[0] {
+                                best_hand = FullHouse(r1, r2)
+                            }
+                            else {
+                                best_hand = FullHouse(r3, r4)
+                            }
+                        }
+                        (Flush(r1), Flush(r2)) => {
+                            if r1 < r2 {
+                                best_hand = Flush(r1)
+                            }
+                            else {
+                                best_hand = Flush(r2)
+                            }
+                        }
+                        (Straight(r1), Straight(r2)) => {
+                            if r1 < r2 {
+                                best_hand = Straight(r1)
+                            }
+                            else {
+                                best_hand = Straight(r2)
+                            }
+                        }
+                        (ThreeOfAKind(r1), ThreeOfAKind(r2)) => {
+                            if r1 < r2 {
+                                best_hand = ThreeOfAKind(r1)
+                            }
+                            else {
+                                best_hand = ThreeOfAKind(r2)
+                            }
+                        }
+                        (TwoPair(r1, r2), TwoPair( r3, r4)) => {
+                            let mut v1 = vec![r1, r2];
+                            let mut v2 = vec![r3, r4];
+                            v1.sort();
+                            v2.sort();
+                            if v1[0] < v2[0] {
+                                best_hand = TwoPair(r1, r2)
+                            }
+                            else {
+                                best_hand = TwoPair(r3, r4)
+                            }
+                        }
+                        (Pair(r1), Pair(r2)) => {
+                            if r1 < r2 {
+                                best_hand = Pair(r1)
+                            }
+                            else {
+                                best_hand = Pair(r2)
+                            }
+                        }
+                        (HighCard(r1), HighCard(r2)) => {
+                            if r1 < r2 {
+                                best_hand = HighCard(r1)
+                            }
+                            else {
+                                best_hand = HighCard(r2)
+                            }
+                        }
+                        _ => {
+                            best_hand = best_hands[0]
+                        }
+                    };
+
                     // increment games won if own hand won in the simulated round
-                    if player_best_hand == best_hands[0] {
+                    if player_best_hand == best_hand {
                         response.games_won += 1;
                     }
 
