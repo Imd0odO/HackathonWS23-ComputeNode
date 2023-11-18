@@ -93,7 +93,7 @@ pub fn deal_remaining(hands: &mut  Vec<Vec<Card>>, cards: &mut Vec<Card>) {
         }
     }
 
-    for mut hand in hands {
+    for hand in hands {
         hand.sort_by_key(|h| h.rank)
     }
 }

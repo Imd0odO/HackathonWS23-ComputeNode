@@ -1,4 +1,3 @@
-use std::ops::DerefMut;
 use rocket::serde::json::Json;
 use crate::models::table::Table;
 use std::time::Instant;
@@ -13,7 +12,7 @@ pub fn monte_carlo(mut table: Json<Table>, active_player: usize) -> WinEstimatio
 
     // generate known hands for every player, hand[0] is the own hand
     let mut hands: Vec<Vec<Card>> = Vec::with_capacity(10);
-    (0..table.players.len()).for_each(|i| {
+    (0..table.players.len()).for_each(|_i| {
         hands.push(table.community_cards.clone());
     });
     hands[0].append(&mut table.players[active_player].cards.as_mut().unwrap());

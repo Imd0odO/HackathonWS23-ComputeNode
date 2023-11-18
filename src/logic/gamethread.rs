@@ -7,10 +7,10 @@ use crate::logic::winning_combinations::{BestHand, evaluate};
 use crate::models::card::Card;
 
 // specify the thread count that should be used (recommended: cores - 2)
-const THREAD_COUNT: usize = 8;
+const THREAD_COUNT: usize = 20;
 
 // specify maximum simulation duration
-const MAX_SIMULATION_TIME: u128 = 900;
+const MAX_SIMULATION_TIME: u128 = 750;
 
 // simulate rounds multithreaded based on known cards and own hands
 pub fn simulate(hands: Vec<Vec<Card>>, remaining_cards: Vec<Card>) -> WinEstimation {
@@ -95,7 +95,8 @@ pub fn simulate(hands: Vec<Vec<Card>>, remaining_cards: Vec<Card>) -> WinEstimat
     }).unwrap();
 
     // return win estimation
-    return WinEstimation { chance: total_games_won as f64 / total_games_played as f64 }
+    let chance: f64 = total_games_won as f64 / total_games_played as f64;
+    return WinEstimation {chance, normalized: chance * hands.len() as f64}
 }
 
 pub struct ThreadResponse {
@@ -106,5 +107,6 @@ pub struct ThreadResponse {
 }
 
 pub struct WinEstimation {
-    pub(crate) chance: f64
+    pub(crate) chance: f64,
+    pub(crate) normalized: f64,
 }

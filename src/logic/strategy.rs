@@ -1,4 +1,3 @@
-use rocket::http::Status;
 use rocket::serde::json::Json;
 use crate::logic::gamethread::WinEstimation;
 use crate::logic::monte_carlo::monte_carlo;
@@ -21,11 +20,16 @@ pub fn decide(mut table: Json<crate::models::table::Table>) -> crate::models::be
 
     // get max bet
     let mut max_bet: i32 = 0;
+    let mut all_in: bool = false;
     for player_index in 0..table.players.len() {
         if max_bet < table.players[player_index].bet {
             max_bet = table.players[player_index].bet;
         }
+        if table.players[player_index].bet >= stack && table.players.len() >= 5 {
+            all_in = true
+        }
     };
+    if all_in {max_bet = stack * 2 / 3}
 
     // get min bet
     let min_bet: i32 = table.minimum_bet;
@@ -35,6 +39,7 @@ pub fn decide(mut table: Json<crate::models::table::Table>) -> crate::models::be
 
     // print estimated chance of winning
     println!("-> Estimated chance of winning this hand: {:2.2}%", estimation.chance * 100.0);
+    println!("-> Relative chance of winning this hand:  {:2.2}", estimation.normalized);
 
     // return minimum bet if first player
     if active_player == 0 {
@@ -42,36 +47,76 @@ pub fn decide(mut table: Json<crate::models::table::Table>) -> crate::models::be
     }
 
     // return bet based on estimation
-    return match estimation {
-        // check if chance of winning < 50 % and max bet > 50 % of stack
-        e if e.chance >= 0.20 && e.chance < 0.5 && max_bet < (stack / 2) => {
-            return Bet { bet: max_bet };
-        }
-
-        // check if chance of winning > 50 % and < 75 %
-        e if e.chance < 0.75 && e.chance > 0.50 => {
-            if max_bet > stack {
-                return Bet {bet: stack};
+    if player_count > 3 {
+        return match estimation.normalized {
+            // all in
+            e if e >= 2.5 => {
+                return Bet{bet: stack}
             }
-            return Bet { bet: max_bet };
-        }
 
-        // raise 25 % if chance of winning > 75 & and < 90 %
-        e if e.chance < 0.90 && e.chance >= 0.75 => {
-            if max_bet > (5 * stack / 4) {
-                return Bet {bet: stack};
+            // raise
+            e if e >= 1.5 && e < 2.5 => {
+                if max_bet as f64 * 1.25 < stack as f64 {max_bet = (max_bet as f64 * 1.25) as i32}
+                return Bet{bet: max_bet}
             }
-            return Bet { bet: 5 * max_bet / 4 };
-        }
 
-        // all in if chance of winning > 90 %
-        e if e.chance >= 0.90 => {
-            return Bet { bet: stack };
-        }
+            // check
+            e if e < 1.5 && e >= 0.75 => {
+                return Bet{bet: max_bet}
+            }
 
-        // fold
-        _ => {
-            Bet{bet: 0}
+            // fold
+            _ => {
+                Bet{bet: 0}
+            }
         }
-    };
+    }
+    else if player_count == 3 {
+        return match estimation.chance {
+            // all in
+            e if e >= 0.80 => {
+                return Bet{bet: stack}
+            }
+
+            // raise
+            e if e >= 0.60 && e < 0.80 => {
+                if max_bet as f64 * 1.25 < stack as f64 {max_bet = (max_bet as f64 * 1.25) as i32}
+                return Bet{bet: max_bet}
+            }
+
+            // check
+            e if e < 0.60 && e >= 0.30 => {
+                return Bet{bet: max_bet}
+            }
+
+            // fold
+            _ => {
+                Bet{bet: 0}
+            }
+        }
+    }
+    else {
+        return match estimation.chance {
+            // all in
+            e if e >= 0.80 => {
+                return Bet{bet: stack}
+            }
+
+            // raise
+            e if e >= 0.55 && e < 0.80 => {
+                if max_bet as f64 * 1.25 < stack as f64 {max_bet = (max_bet as f64 * 1.25) as i32}
+                return Bet{bet: max_bet}
+            }
+
+            // check
+            e if e < 0.55 && e >= 0.45 => {
+                return Bet{bet: max_bet}
+            }
+
+            // fold
+            _ => {
+                Bet{bet: 0}
+            }
+        }
+    }
  }

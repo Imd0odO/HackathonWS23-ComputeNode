@@ -1,6 +1,5 @@
 use crate::logic::winning_combinations::BestHand::{Flush, FourOfAKind, FullHouse, HighCard, Pair, ThreeOfAKind, TwoPair};
 use crate::models::card::Card;
-use crate::models::rank;
 use crate::models::rank::Rank;
 use crate::models::suit::Suit;
 
@@ -127,7 +126,7 @@ fn evaluate_pairs(cards: &Vec<Card>) -> BestHand {
         if rank.len() == 3 {
             best = match best {
                 Pair(r) => FullHouse(rank[0].rank, r),
-                HighCard(r) => ThreeOfAKind(rank[0].rank),
+                HighCard(_r) => ThreeOfAKind(rank[0].rank),
                 _ => best
             }
         }
@@ -135,7 +134,7 @@ fn evaluate_pairs(cards: &Vec<Card>) -> BestHand {
             best = match best {
                 ThreeOfAKind(r) => FullHouse(r, rank[0].rank),
                 Pair(r) => TwoPair(r, rank[0].rank),
-                HighCard(r) => Pair(rank[0].rank),
+                HighCard(_r) => Pair(rank[0].rank),
                 _ => best
             }
         }
